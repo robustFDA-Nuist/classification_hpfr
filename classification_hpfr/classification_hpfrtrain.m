@@ -85,7 +85,7 @@ sigb0 = 0.01 * ones(K, 1);
 
  
 % ==========================================================================
-% ------ Effective method -------
+% ------ Efficient method -------
 % --------------
 % Step 2:
 % Sampling based on the full conditional distributions of
