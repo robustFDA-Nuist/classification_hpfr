@@ -4,6 +4,7 @@ Using Heavy-tailed Process Functional Regression".
 The following files are stored in .../classification_hpfr/
 
 demo.m : the matlab code for a demo example of  Melbourne Pedestrian Data. 
+
 traindata.mat : training data file. In which: (assume that the number of  training curves is n and the number of observations of curves is m)
                          traindata: K x 1 cells structure. The k-th cell is a matrix in which observations of the variable y in k-th class.
 	
