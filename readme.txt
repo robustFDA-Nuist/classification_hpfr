@@ -12,6 +12,5 @@ testdata.mat : testing data file. In which:
 
 
 
-fdaM: J.O.Ramsay's FDA codes with minor changes
-classificaiton_hpfr: codes for Joint classiffication and prediction of random curves
-using heavy-tailed process functional regression
+fdaM: J.O.Ramsay's FDA codes with minor changes, which can be availabled at https://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/.
+classificaiton_hpfr: codes for Joint classiffication and prediction of random curves using heavy-tailed process functional regression
