@@ -4,8 +4,7 @@ function output_train = classification_hpfrtrain(input, distribution1, distribut
 % ============
 % This is the main function for parameter estimation using MCMC algorithom by Gibbs sampling based
 % on the full conditional distributions of the parameters and latent
-% variables. Steps are consistent with the paper, and details are provided
-% in Section 3.3.
+% variables. More details are provided in Section 3.3.
 %
 % ============
 % INPUT:
@@ -83,60 +82,9 @@ sige = 0.01;
 % Initial value for sigma_beta^2(k)
 sigb0 = 0.01 * ones(K, 1);
 
- 
-% ==========================================================================
-% ------ Efficient method -------
-% --------------
-% Step 2:
-% Sampling based on the full conditional distributions of
-% the parameters and latent variables for the k-th class
-% using the k-th data, respectively.
-% --------------
-meandata = cell(K, 1);
-mubeta = cell(K, 1);
-simul = cell(K, 1);
-Tau = cell(K, 1);
-Amubeta = [];
-temp_sige = [];
-Tau_k = cell(K, 1);
-ydata = cell(K, 1);
-KU = cell(K, 1);
-for k = 1 : K
-    meandata{k} = mean(traindata{k}, 2);
-    mubeta{k} = regress(meandata{k}, B);
-    [simul{k}, Tau{k}, KU{k}] = para_estimation_k(traindata{k}, mubeta{k}, t, distribution1, distribution2, sigb0(k), xi, phi, sige, nu1, nu2, B, D, niter);
-    mubeta{k} = median(simul{k}(isample, 1 : D), 1)';
-    Amubeta = cat(2, Amubeta, mubeta{k});
-    temp_sige = cat(1, temp_sige, simul{k}(isample, D + 3));
-    sige = median(temp_sige);
-    Tau_k{k} = update_value_tau_k(Tau{k}, nn(k), isample);
-    ydata{k} = traindata{k};
-    KU{k} = update_value_KU(KU{k}, nn(k), isample);
-end
-
-% --------------
-% Step 3:
-% Update parameters of the fixed term with label k using k-th
-% --------------
-[FixedPara, Sigb0] = FixedParaEst(ydata, Tau_k, Amubeta, KU, sige, t, nn, B, D, niter);
-ycenter = cell(K, 1);
-Aycenter = [];
-for k = 1 : K
-    ycenter{k} = ydata{k} - kron(ones(1, nn(k)), B * mubeta{k});
-    Aycenter = cat(2, Aycenter, ycenter{k});
-end
-
-% --------------
-% Step 4:
-% Update parameters of the random term
-% --------------
-[RandomPara, tau_mcmc, KU1_mcmc, KU2_mcmc] = RandomParaEst(Aycenter, distribution1, distribution2, t, n, m, D, niter);
-
 
 % ==========================================================================
-% %-------- Alternative method-------
-% % The procedure for the alternative method is consistent with that in the
-% % paper.
+% %-------- method -------
 % % --------------
 % % Initial value for priors on parameters: sigma_e^2, sigma_beta^2(k)
 % a_0 = 0.1; b_0 = 0.1;
@@ -163,7 +111,6 @@ end
 %     % distribution p(tau_i | y_i, u_i, sigma_e^2, v_i, w, v0)
 %     %--------------
 %     ycenter = [];
-
 %     for k = 1 : K
 %         ycenter = cat(2, ycenter, ydata{k} - kron(ones(1, nn(k)), B * mubeta{k}));
 %     end
@@ -208,6 +155,7 @@ end
 %         % Sampling mu_beta0^(k) from the posterior
 %         % distribution p(mu_beta0^(k) | mu_beta^(k), sigma_b0^2(k)*I_p)
 %         %--------------
+
 %         mubeta0{k} = (mvnrnd(mubeta{k}, sigb0(k) * eye(D), 1))';
 %
 %         %--------------
@@ -215,8 +163,8 @@ end
 %         % Sampling mu_beta^(k) from the posterior
 %         % distribution p(mu_beta^(k) | tau, u, mu_beta0^(k), sigma_b0^2(k))
 %         %--------------
+
 %         ystretch = ydata{k}(:);
-%
 %         taustretch = temptau(:, 1 : nn(k));
 %         taustretch = taustretch(:);
 %         temptau(:, 1 : nn(k)) = [];
@@ -355,6 +303,58 @@ end
 %     RandomPara(iter,:) = [exp(xi), sige, nu1, nu2];
 % end
 % ==========================================================================
+
+
+% ------ Alternative efficient method -------
+% --------------
+% Step 2:
+% Sampling based on the full conditional distributions of
+% the parameters and latent variables for the k-th class
+% using the k-th data, respectively.
+% --------------
+meandata = cell(K, 1);
+mubeta = cell(K, 1);
+simul = cell(K, 1);
+Tau = cell(K, 1);
+Amubeta = [];
+temp_sige = [];
+Tau_k = cell(K, 1);
+ydata = cell(K, 1);
+KU = cell(K, 1);
+for k = 1 : K
+    meandata{k} = mean(traindata{k}, 2);
+    mubeta{k} = regress(meandata{k}, B);
+    [simul{k}, Tau{k}, KU{k}] = para_estimation_k(traindata{k}, mubeta{k}, t, distribution1, distribution2, sigb0(k), xi, phi, sige, nu1, nu2, B, D, niter);
+    mubeta{k} = median(simul{k}(isample, 1 : D), 1)';
+    Amubeta = cat(2, Amubeta, mubeta{k});
+    temp_sige = cat(1, temp_sige, simul{k}(isample, D + 3));
+    sige = median(temp_sige);
+    Tau_k{k} = update_value_tau_k(Tau{k}, nn(k), isample);
+    ydata{k} = traindata{k};
+    KU{k} = update_value_KU(KU{k}, nn(k), isample);
+end
+
+% --------------
+% Step 3:
+% Update parameters of the fixed term with label k using k-th
+% --------------
+[FixedPara, Sigb0] = FixedParaEst(ydata, Tau_k, Amubeta, KU, sige, t, nn, B, D, niter);
+ycenter = cell(K, 1);
+Aycenter = [];
+for k = 1 : K
+    ycenter{k} = ydata{k} - kron(ones(1, nn(k)), B * mubeta{k});
+    Aycenter = cat(2, Aycenter, ycenter{k});
+end
+
+% --------------
+% Step 4:
+% Update parameters of the random term
+% --------------
+[RandomPara, tau_mcmc, KU1_mcmc, KU2_mcmc] = RandomParaEst(Aycenter, distribution1, distribution2, t, n, m, D, niter);
+
+% ==========================================================================
+
+
 
 
 
