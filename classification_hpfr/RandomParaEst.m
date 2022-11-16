@@ -3,8 +3,7 @@ function [RandomPara, Tau, KU_1, KU_2] = RandomParaEst(y, distribution1, distrib
 % Description:
 % ============
 % This is the main function to estimate parameters of random term by
-% Gibbs sampling. Steps are consistent with the paper, and 
-% details are provided in Section 3.3
+% Gibbs sampling. 
 % 
 % ============
 % INPUT:
