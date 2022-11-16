@@ -4,8 +4,7 @@ function [simul, Tau, KU] = para_estimation_k(y, mubeta, t, distribution1, distr
 % ============
 % This is the main function to sample based on the full conditional distributions of
 % the parameters and latent variables for the k-th class
-% using the k-th data, respectively. Steps are consistent with the paper, and 
-% details are provided in Section 3.3
+% using the k-th data, respectively.
 %
 % ============
 % INPUT:
